@@ -1,4 +1,4 @@
-﻿Step 1 — Installing Docker
+# Installing Docker
 
 First, update your current package list:
 
