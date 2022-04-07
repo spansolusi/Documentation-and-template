@@ -1,0 +1,14 @@
+---
+
+- name: Run the test playbook
+  gather_facts: false
+  hosts: localhost
+  tasks:
+    - name: Get the username running this playbook
+      become: false
+      local_action: command whoami
+      register: username_on_the_host
+
+    - name: Display the User name
+      ansible.builtin.debug:
+        msg: "Hello User {{ username_on_the_host.stdout }} from Jenkins and Ansible!!"

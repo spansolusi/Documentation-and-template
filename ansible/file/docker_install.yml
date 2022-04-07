@@ -1,0 +1,47 @@
+---
+- name: Setup Docker
+  hosts: all
+  become: true
+  tasks:
+    - name: Update system
+      apt:
+        update_cache: yes
+
+    - name: Upgrade system
+      apt:
+        upgrade: dist
+
+    - name: Setup repository
+      shell: "sudo apt-get install ca-certificates curl gnupg lsb-release"
+      args:
+        executable: /bin/bash
+
+    - name: Add docker GPG key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+
+    - name: Add docker repository
+      apt_repository:
+        repo: deb https://download.docker.com/linux/ubuntu focal stable
+        state: present
+
+    - name: Update system
+      apt:
+        update_cache: yes
+
+    - name: Install docker engine
+      apt:
+        name: "{{item}}"
+        state: latest
+        update_cache: yes
+      loop:
+        - docker-ce
+        - docker-ce-cli
+        - containerd.io
+   
+    - name: Docker run
+      shell: "sudo chmod 666 /var/run/docker.sock"
+      args:
+        executable: /bin/bash
+
