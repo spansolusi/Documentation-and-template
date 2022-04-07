@@ -26,3 +26,4 @@ Disk: 20 GB hard disk
 * Instance size of m3.medium or larger
 * An instance size of m3.xlarge or larger if there are more than 100 hosts
 
+[Installation Guide(ubuntu)](https://www.linuxtechi.com/how-to-install-ansible-on-ubuntu/)
