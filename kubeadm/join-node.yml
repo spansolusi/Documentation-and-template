@@ -1,0 +1,10 @@
+---
+- name: Join Node to Master
+  hosts: node
+  become: true
+  tasks:
+    # Join Node to Master
+    - name: Join node to Master
+      shell: "sudo kubeadm join your-instance-ip-adress-and-generated-token-here"
+      args:
+        executable: /bin/bash

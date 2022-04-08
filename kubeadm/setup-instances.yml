@@ -1,0 +1,114 @@
+---
+- name: Setup Instances
+  hosts: server
+  become: true
+  tasks:
+    # Update & upgarde ubuntu system
+    - name: Update system
+      apt:
+        update_cache: yes
+    
+    - name: Upgrade system
+      apt:
+        upgrade: dist
+    
+    # Install Docker
+    - name: Setup repository
+      shell: "sudo apt-get install ca-certificates curl gnupg lsb-release"
+      args:
+        executable: /bin/bash
+    
+    - name: Add docker GPG key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+      
+    - name: Add docker repository
+      apt_repository:
+        repo: deb https://download.docker.com/linux/ubuntu focal stable
+        state: present
+    
+    - name: Update system
+      apt:
+        update_cache: yes
+    
+    - name: Install docker engine
+      apt:
+        name: "{{item}}"
+        state: latest
+        update_cache: yes
+      loop:
+        - docker-ce
+        - docker-ce-cli
+        - containerd.io
+    
+    - name: Install docker compose
+      shell: sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+      args:
+        executable: /bin/bash
+    
+    - name: Apply executable permission to the binary docker compose
+      shell: "sudo chmod +x /usr/local/bin/docker-compose"
+      args:
+        executable: /bin/bash
+    
+    - name: Remove sudo on docker command
+      shell: sudo usermod -aG docker ubuntu
+      args:
+        executable: /bin/bash
+    
+    # Install Kubernetes
+    - name: Install transport https package
+      shell: sudo apt-get install apt-transport-https curl -y
+      args:
+        executable: /bin/bash
+      
+    - name: Add kubernetes repo key
+      shell: "wget https://packages.cloud.google.com/apt/doc/apt-key.gpg"
+      args:
+        executable: /bin/bash
+    
+    - name: Apply kubernetes key
+      shell: "sudo apt-key add apt-key.gpg"
+      args:
+        executable: /bin/bash
+    
+    - name: Disable swap temporary
+      shell: "sudo swapoff -a"
+      args:
+        executable: /bin/bash
+    
+    - name: Configure kubernetes repo
+      vars:
+        string_list: '"deb http://apt.kubernetes.io/ kubernetes-xenial main"'
+      shell: "sudo apt-add-repository {{ string_list }}"
+      args:
+        executable: /bin/bash
+    
+    - name: Install kubeadm
+      shell: "sudo apt-get install kubeadm -y"
+      args:
+        executable: /bin/bash
+    
+    - # Fix issue kubelet-check
+    - name: Execute command sed
+      shell: "sudo sed -i '/ swap / s/^/#/' /etc/fstab"
+      args:
+        executable: /bin/bash
+  
+    - name: Create daemon.json file
+      copy:
+        dest: "/etc/docker/daemon.json"
+        content: |
+         {
+            "exec-opts": ["native.cgroupdriver=systemd"]
+         }
+    
+    - name: Restarting daemon, docker, & kubelet
+      shell: "{{item}}"
+      args:
+        executable: /bin/bash
+      loop:
+        - sudo systemctl daemon-reload
+        - sudo systemctl restart docker
+        - sudo systemctl restart kubelet
