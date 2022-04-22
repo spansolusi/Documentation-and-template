@@ -86,7 +86,7 @@
         executable: /bin/bash
     
     - name: Install kubeadm
-      shell: "sudo apt-get install kubeadm -y"
+      shell: "sudo apt-get install kubeadm kubelet kubectl -y"
       args:
         executable: /bin/bash
     
