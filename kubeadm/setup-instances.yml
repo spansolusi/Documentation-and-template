@@ -3,18 +3,9 @@
   hosts: server
   become: true
   tasks:
-    # Update & upgarde ubuntu system
-    - name: Update system
-      apt:
-        update_cache: yes
-    
-    - name: Upgrade system
-      apt:
-        upgrade: dist
-    
-    # Install Docker
+     # Install tools
     - name: Setup repository
-      shell: "sudo apt-get install ca-certificates curl gnupg lsb-release"
+      shell: "sudo apt-get update && apt install -y apt-transport-https ca-certificates curl gnupg-agent software-properties-common"
       args:
         executable: /bin/bash
     
@@ -41,17 +32,7 @@
         - docker-ce
         - docker-ce-cli
         - containerd.io
-    
-    - name: Install docker compose
-      shell: sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-      args:
-        executable: /bin/bash
-    
-    - name: Apply executable permission to the binary docker compose
-      shell: "sudo chmod +x /usr/local/bin/docker-compose"
-      args:
-        executable: /bin/bash
-    
+
     - name: Remove sudo on docker command
       shell: sudo usermod -aG docker ubuntu
       args:
@@ -64,7 +45,7 @@
         executable: /bin/bash
       
     - name: Add kubernetes repo key
-      shell: "wget https://packages.cloud.google.com/apt/doc/apt-key.gpg"
+      shell: "curl https://packages.cloud.google.com/apt/doc/apt-key.gpg"
       args:
         executable: /bin/bash
     
